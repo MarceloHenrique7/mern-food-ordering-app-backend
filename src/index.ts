@@ -4,6 +4,7 @@ import "dotenv/config"
 import mongoose from 'mongoose';
 import myUserRoute from './routes/MyUserRoute'
 import myRestaurantRoute from './routes/MyRestaurantRoute'
+import RestaurantRoute from './routes/RestaurantRoute'
 import { v2 as cloudinary } from 'cloudinary'
 
 mongoose
@@ -29,6 +30,7 @@ app.get("/health", async (req: Request, res: Response) => { // essa rota servira
 // /api/my/user ou /api/my/restaurant essas linha serão executada toda vez que for chamada essas rota
 app.use("/api/my/user", myUserRoute) // dizemos que para essa rota sempre usaremos as rotas definida no arquivo MyUserRoute
 app.use("/api/my/restaurant", myRestaurantRoute) // dizemos que para essa rota sempre usaremos as rotas definida no arquivo MyRestaurantRoute
+app.use("/api/restaurant", RestaurantRoute) // dizemos que para essa rota sempre usaremos as rotas definida no arquivo RestaurantRoute
 
 app.listen(7000, () => {
     console.log("server started on localhost:7000")
