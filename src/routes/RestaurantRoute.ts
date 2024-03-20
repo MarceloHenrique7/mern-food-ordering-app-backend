@@ -5,6 +5,20 @@ import { param } from "express-validator";
 const router = express.Router();
 
 
+
+router.get("/:restaurantId", 
+    param("restaurantId")
+    .isString()
+    .trim()
+    .notEmpty()
+    .withMessage("RestaurantId parament must be a valid string"),
+    RestaurantController.getRestaurant
+) 
+// nessa rota teremos que receber um id do restaurante clicado pelo usuario
+// fazemos a validação para esse parâmetro
+// (RestaurantController.getRestaurant) esse e o metodo para obter o restaurant
+
+// -------------------------------------------------------------------------------------------------------------
 // nessa rota vamos receber uma cidade como parâmetro da url
 // exmplo: /api/restaurant/search/londres
 router.get(

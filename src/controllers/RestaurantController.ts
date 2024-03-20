@@ -2,6 +2,24 @@ import { Request, Response } from "express"
 import Restaurant from "../models/restaurant";
 
 
+const getRestaurant = async (req: Request, res: Response) => {
+    try {
+        const restaurantId = req.params.restaurantId; // pegamos da request o id do restaurant que foi passado
+        
+        const restaurant = await Restaurant.findById(restaurantId); // aqui buscamos o restaurante na base de dados pelo id
+
+        if(!restaurant) { // se não conseguimos encontrar esse restaurante retornamos um error de not Found (404), e uma mensagem de erro
+            return res.status(404).json({ message: "Restaurant not found" })
+        }
+
+        res.json(restaurant); // se conseguimos encontrar, retornamos o restaurante
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: "Something went wrong" })
+    }
+}
+
+
 const searchRestaurant = async (req: Request, res: Response) => {
 
     try {
@@ -234,5 +252,6 @@ const searchRestaurant = async (req: Request, res: Response) => {
 
 
 export default {
-    searchRestaurant
+    getRestaurant,
+    searchRestaurant,
 }
