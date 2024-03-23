@@ -2,6 +2,7 @@ import { Request, Response } from "express"
 import Restaurant from "../models/restaurant"
 import cloudinary from 'cloudinary'
 import mongoose from "mongoose"
+import Order from "../models/order"
 
 
 // função para obetermos os dados do restaurante
@@ -88,6 +89,42 @@ const updateMyRestaurant = async (req: Request, res: Response) => {
 }
 
 
+const updateOrderStatus = async (req: Request, res: Response) => {
+    // função para atualizar o status do nosso pedido
+    try {
+        const { orderId } = req.params;
+        // aqui pegamos o id que passamos como parâmetro
+        const { status } = req.body;
+        // pegamos o status que vamos atualizar no pedido que vai vim do body
+
+        const order = await Order.findById(orderId)
+        // procuramos na base de dados pelo order (pedido) usando id recebido como parâmetro
+
+        if(!order) {
+            // se o pedido não existir retornamos um erro
+            return res.status(404).json({ message: "order not found" })
+        }
+
+        const restaurant = await Restaurant.findById(order.restaurant)
+        // depois buscamos pelo restaurante ultilizando o id do restaurante, (order armazena o id do restaurante, então order.restaurante e um objectId)
+
+        // o motivo pelo qual pegamos o restaurante, e para checar se o usuário logado é o dono desse restaurante
+        if(restaurant?.user?._id.toString() !== req.userId) {
+            // se o id do usuário que está vinculado a esse restaurante não for igual ao id do usuário logado
+            return res.status(401).send() // retornamos um statusCode de "Unauthorized" porque ele não pode atualizar um pedido que o restaurante não e dele
+        }   
+
+        order.status = status // então por fim, atualizamos o status do pedido
+        await order.save(); // salvamos o pedido atualizado
+
+        res.status(200).json(order) // retornamos uma resposta de 200 (ok) e Retornamos também o pedido atualizado
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: "unable to update order status" })
+    }
+}
+
+
 //função que converte a imagem para binario, depois construimos uma sttring do tipo de dados URI, apos isso subimos esse URI para o cloudinary que nos retorna uma url para acessar essa imagem
 const uploadImage = async (file: Express.Multer.File) => { // essa linha de código está simplesmente atribuindo o objeto file, que contém as informações sobre o arquivo enviado na requisição, para a variável image, garantindo que o TypeScript reconheça corretamente o tipo desse objeto como Express.Multer.File. Essa variável image pode então ser usada para acessar informações sobre o arquivo, como nome, tamanho
     const image = file
@@ -97,7 +134,36 @@ const uploadImage = async (file: Express.Multer.File) => { // essa linha de cód
     return uploadResponse.url
 }
 
+// Nessa função pegamos todos pedidos que foram feitos ao nosso restaurant
+const getMyRestaurantOrders = async (req: Request, res: Response) => {
+    try {
+        const restaurant = await Restaurant.findOne({ user: req.userId }) 
+        // primeiro procuramos pelo restaurante com id do usuario logado
+
+        if (!restaurant) { // se não encontramos o restaurante retornamos um status de not Found e uma msg de error
+            return res.status(404).json({ message: "something went wrong" })
+        }
+        
+        const orders = await Order.find({ restaurant: restaurant._id }).populate("restaurant").populate("user")
+        
+        /* 
+            Agora pegamos os pedidos na base de dados Ordes pelo id do restaurante 
+            orders nos retorna um array de pedidos
+
+        então populate siginifica para ele nos retornar o "restaurant" e o "user" que estão relacionados
+        a esse pedido, junto com o objeto do pedido
+        */
+
+        res.json(orders) // retornamos o array de orders
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: "something went wrong" })
+    }
+}
+
 export default {
+    updateOrderStatus,
+    getMyRestaurantOrders,
     createMyRestaurant,
     getMyRestaurant,
     updateMyRestaurant,

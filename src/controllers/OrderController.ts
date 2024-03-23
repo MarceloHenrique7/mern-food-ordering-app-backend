@@ -14,6 +14,47 @@ const STRIPE_ENDPOINT_SECRET = process.env.STRIPE_WEBHOOK_SECRET as string
 // pegamos nosso endpoint para acessar o webhook do stripe
 
 
+const getMyOrder = async (req: Request, res: Response) => {
+    try {
+        const orders = await Order.find({ user: req.userId }).populate("restaurant").populate("user")
+        /*
+            Procuramos nos documentos de Order pelo order (pedido) que tem o id do usuário no campo user
+            então se o pedido tiver o id do usuario logado, nos obtemos esses pedidos
+
+            populate vai nos trazer o user e o restaraurant junto com objeto "orders",
+            nós referênciamos esses models "User" e "Restaurant" no nosso model de "Order"
+
+            iremos retornar um objeto assim: 
+
+            Order = { // criamos um tipo para o pedido
+            _id: string; // teremos um id do pedido
+            restaurant: Restaurant; // teremos um restaurante que foi feito o pedido
+            user: User; // teremos o usuário que fez o pedido
+            cartItems: { // teremos um carrinhos de items
+                menuItemId: string;
+                name: string;
+                quantity: string;
+            }[]; // esse [] indica que cartItems vai ser um array, que vai conter varios objetos com essas três propiedades
+            deliveryDetails: {
+                name: string;
+                addressLine1: string;
+                city: string;
+                email: string;
+            };
+            totalAmount: number;
+            status: OrderStatus;
+            createdAt: string;
+            restaurantId: string;
+        }
+        */
+       res.json(orders);
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: "something went wrong" })
+    }
+}
+
 type CheckoutSessionRequest = { // criamos um tipo para nossa request
     cartItems: { // iremos receber o carrinho (cartItems)
         menuItemId: string;
@@ -213,6 +254,7 @@ const createSession = async (lineItems: Stripe.Checkout.SessionCreateParams.Line
 
 
 export default {
+    getMyOrder,
     createCheckoutSession,
     stripeWebHookHandler,
 }

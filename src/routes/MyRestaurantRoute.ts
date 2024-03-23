@@ -15,9 +15,14 @@ const upload = multer({ // aqui nos configuramos o multer passando essas opçõe
     }
 })
 
+// usamos patch para atualizar o status do pedido, então patch porque iremos atualizar apenas uma propiedade e não todo pedido
+router.patch("/order/:orderId/status", jwtCheck, jwtParse, MyRestaurantController.updateOrderStatus)
 
 // GET /api/my/restaurant
 router.get("/", jwtCheck, jwtParse, MyRestaurantController.getMyRestaurant) // rota para obtermos os dados do nosso restaurante
+
+// essa rota e para pegarmos todos pedidos que meu restaurante possui
+router.get("/order", jwtCheck, jwtParse, MyRestaurantController.getMyRestaurantOrders)
 
 // api/my/restaurant
 router.post(
