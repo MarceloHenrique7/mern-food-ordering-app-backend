@@ -10,7 +10,7 @@ const getMyRestaurant = async (req: Request, res: Response) => {
     try {
         const restaurant = await Restaurant.findOne({ user: req.userId }) // buscamos na base de dados pelo restaurante, usando o id do usuario, esse id do usuario e atribuido na hora da criação do restaurante, pegamos o id do usuario que esta criando o restaurante e atribuimos a um campo chamado "user" no "Restaurante"
         if (!restaurant) {
-            return res.status(404).json({ message: "restaurant nor found" }) // caso não encontrarmos o restaurante, retornamos uma mensagem de erro dizendo que o restaurante nao foi encontrado
+            return res.status(404).json({ message: "restaurant not found" }) // caso não encontrarmos o restaurante, retornamos uma mensagem de erro dizendo que o restaurante nao foi encontrado
         }
 
         res.json(restaurant) // se o restaurante existir retornamos ele

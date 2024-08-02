@@ -85,6 +85,7 @@ const stripeWebHookHandler = async (req: Request, res: Response) => {
             stripe irá verificar se a solicitação veio do stripe usando nosso endpointSecret que definimos em .env
         */
         // construimos um evento do stripe passando nosso body e a "sig" (assinatura), depois nosso endpoint
+        console.log(event)
     } catch (error: any) {  
         console.log(error)
         return res.status(400).send(`Webhook erro: ${error.message}` )
@@ -133,7 +134,6 @@ const createCheckoutSession = async (req: Request, res: Response) => {
             deliveryDetails: checkoutSessionRequest.deliveryDetails, // passamos os detalhes do pedido
             cartItems: checkoutSessionRequest.cartItems, // passamos o carrinho de items
             createAt: new Date(), // passamos para createAt uma data, criamos a data com new Date()
-
         })
 
         const lineItems = createLineItems(checkoutSessionRequest, restaurant.menuItems)

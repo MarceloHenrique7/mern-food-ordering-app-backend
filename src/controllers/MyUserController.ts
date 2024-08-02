@@ -8,7 +8,7 @@ const getCurrentUser = async (req: Request, res: Response) => { // criamos uma f
             return res.status(404).json({ message: "User not found" }) // se o currentuser não existir nos retornamos 404, e uma mensagem de erro, dizendo que o user não foi encontrado
         }
 
-        res.json(currentUser) // se o user foi encontrado retornamos o currentUser (usuario)
+        res.status(200).json(currentUser) // se o user foi encontrado retornamos o currentUser (usuario)
     } catch (error) {
         console.log(error);
         return res.status(500).json({message: "Something went wrong"}) // se der erro lançamos de volta um erro

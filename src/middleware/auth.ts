@@ -2,7 +2,9 @@ import { Request, Response, NextFunction } from "express";
 import { auth } from "express-oauth2-jwt-bearer";
 import jwt from 'jsonwebtoken'
 import User from "../models/user";
+import dotenv from 'dotenv'
 
+dotenv.config()
 
 declare global { // declare global, porque queremos que esse tipo que estamos criando seja acessivel em qualquer lugar do projeto
   namespace Express { // Representa que estamos criando uma referencia para Express
@@ -21,17 +23,15 @@ export const jwtCheck = auth({
     tokenSigningAlg: 'RS256'
 });
 
-
-
-
 export const jwtParse = async (req: Request, res: Response, next: NextFunction) => {
 
   // função para fazer o parse o tokenJWT, assim tambem teremos acesso ao id do usuario que vai servir para função de update
 
   const { authorization } = req.headers;
 
+
   if(!authorization || !authorization.startsWith("Bearer")) { // se não existir authorization ou se existir authorization mas não começar com "Bearer" o valor desse authorization então execute esse if
-    return res.sendStatus(401); // é uma forma conveniente de enviar uma resposta HTTP com apenas o código de status
+    return res.status(401).json({ message: "Incorrect Token" }); // é uma forma conveniente de enviar uma resposta HTTP com apenas o código de status
   } 
 
   const token = authorization.split(' ')[1]; // o token vem assim "Bearer Token" e dai fazemos um split e pegamos apenas o token
@@ -40,10 +40,15 @@ export const jwtParse = async (req: Request, res: Response, next: NextFunction) 
     const decoded = jwt.decode(token) as jwt.JwtPayload // fazemos o decoded do token , nesse decoded contem Auth0Id so user (id)
     const auth0Id = decoded.sub // sub e a propiedade que armazena esse id
 
+    console.log(decoded)
+    console.log(auth0Id)
+
     const user = await User.findOne({ auth0Id: auth0Id }) // apenas buscando no banco de dados pelo usuario
+    
+    console.log(user)
 
     if(!user) { // se o usuario não existir na base de dados
-      return res.sendStatus(401)
+      return res.status(404).json({ message: "user not found" })
     }
 
     req.auth0Id = auth0Id as string; // esse e o id do auth0 do serviço de login que fizemos no frontend
@@ -52,7 +57,7 @@ export const jwtParse = async (req: Request, res: Response, next: NextFunction) 
     next() // chamamos a proxima função ou middleware para ser executada
 
   } catch (error) {
-    return res.sendStatus(401)
+    return res.status(401).json({ message: "Something went wrong" })
   }
 
 }
